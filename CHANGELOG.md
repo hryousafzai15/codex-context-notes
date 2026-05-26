@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## 0.4.7 - 2026-05-26
+
+- Made the Settings shortcut section responsive so shortcut text and controls stack cleanly at compact widths.
+
 ## 0.4.6 - 2026-05-26
 
 - Allowed the notes panel to be resized smaller while adapting footer controls for compact widths.

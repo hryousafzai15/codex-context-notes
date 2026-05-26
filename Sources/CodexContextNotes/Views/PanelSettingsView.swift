@@ -81,45 +81,72 @@ struct PanelSettingsView: View {
 
     private var shortcutSection: some View {
         SettingsCard(systemImage: "keyboard", title: "Shortcut", detail: shortcutStatusText, detailColor: shortcutStatusColor) {
-            HStack(alignment: .top, spacing: 12) {
-                VStack(alignment: .leading, spacing: 5) {
-                    Text("Open notes panel")
-                        .font(.callout.weight(.semibold))
-
-                    Text("Choose the key combination that opens and closes this panel.")
-                        .font(.caption)
-                        .foregroundStyle(.white.opacity(0.52))
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-
-                Spacer(minLength: 8)
-
-                ShortcutRecorderButton(shortcut: $shortcut)
+            ViewThatFits(in: .horizontal) {
+                shortcutHorizontalLayout
+                shortcutStackedLayout
             }
 
-            HStack(spacing: 8) {
-                Button {
-                    saveShortcut(.default)
-                } label: {
-                    Label("Reset", systemImage: "arrow.counterclockwise")
-                        .font(.caption.weight(.semibold))
-                        .frame(height: 28)
-                }
-                .buttonStyle(.plain)
-                .padding(.horizontal, 10)
-                .background(Color.white.opacity(0.07), in: Capsule())
-                .overlay {
-                    Capsule()
-                        .strokeBorder(.white.opacity(0.10), lineWidth: 1)
-                }
+            shortcutFooter
+        }
+    }
 
-                Spacer()
+    private var shortcutHorizontalLayout: some View {
+        HStack(alignment: .top, spacing: 12) {
+            shortcutDescription
+                .frame(minWidth: 160, alignment: .leading)
 
-                if lastShortcutSelfTestAt > 0 {
-                    Text("Tested \(Date(timeIntervalSince1970: lastShortcutSelfTestAt).formatted(date: .omitted, time: .shortened))")
-                        .font(.caption2.weight(.semibold))
-                        .foregroundStyle(.white.opacity(0.42))
-                }
+            Spacer(minLength: 8)
+
+            ShortcutRecorderButton(shortcut: $shortcut)
+        }
+    }
+
+    private var shortcutStackedLayout: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            shortcutDescription
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            ShortcutRecorderButton(shortcut: $shortcut, fillsWidth: true)
+        }
+    }
+
+    private var shortcutDescription: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text("Open notes panel")
+                .font(.callout.weight(.semibold))
+
+            Text("Choose the key combination that opens and closes this panel.")
+                .font(.caption)
+                .foregroundStyle(.white.opacity(0.52))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var shortcutFooter: some View {
+        HStack(spacing: 8) {
+            Button {
+                saveShortcut(.default)
+            } label: {
+                Label("Reset", systemImage: "arrow.counterclockwise")
+                    .font(.caption.weight(.semibold))
+                    .frame(height: 28)
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, 10)
+            .background(Color.white.opacity(0.07), in: Capsule())
+            .overlay {
+                Capsule()
+                    .strokeBorder(.white.opacity(0.10), lineWidth: 1)
+            }
+
+            Spacer()
+
+            if lastShortcutSelfTestAt > 0 {
+                Text("Tested \(Date(timeIntervalSince1970: lastShortcutSelfTestAt).formatted(date: .omitted, time: .shortened))")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(.white.opacity(0.42))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
             }
         }
     }
@@ -241,12 +268,13 @@ private struct SettingsCard<Content: View>: View {
 
 private struct ShortcutRecorderButton: View {
     @Binding var shortcut: AppShortcut
+    var fillsWidth = false
     @State private var isRecording = false
     @State private var warningText: String?
     @State private var monitor: Any?
 
     var body: some View {
-        VStack(alignment: .trailing, spacing: 6) {
+        VStack(alignment: fillsWidth ? .leading : .trailing, spacing: 6) {
             Button {
                 isRecording ? stopRecording() : startRecording()
             } label: {
@@ -259,7 +287,8 @@ private struct ShortcutRecorderButton: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.75)
                 }
-                .frame(width: 142, height: 32)
+                .frame(width: fillsWidth ? nil : 142, height: 32)
+                .frame(maxWidth: fillsWidth ? .infinity : nil)
                 .background(isRecording ? Color.blue.opacity(0.24) : Color.white.opacity(0.08), in: Capsule())
                 .overlay {
                     Capsule()
@@ -272,14 +301,16 @@ private struct ShortcutRecorderButton: View {
                 Text(warningText)
                     .font(.caption2)
                     .foregroundStyle(.orange)
-                    .multilineTextAlignment(.trailing)
-                    .frame(width: 154, alignment: .trailing)
+                    .multilineTextAlignment(fillsWidth ? .leading : .trailing)
+                    .frame(width: fillsWidth ? nil : 154, alignment: fillsWidth ? .leading : .trailing)
+                    .frame(maxWidth: fillsWidth ? .infinity : nil, alignment: .leading)
             } else if isRecording {
                 Text("Control, Option, or Command plus a key.")
                     .font(.caption2)
                     .foregroundStyle(.white.opacity(0.48))
-                    .multilineTextAlignment(.trailing)
-                    .frame(width: 154, alignment: .trailing)
+                    .multilineTextAlignment(fillsWidth ? .leading : .trailing)
+                    .frame(width: fillsWidth ? nil : 154, alignment: fillsWidth ? .leading : .trailing)
+                    .frame(maxWidth: fillsWidth ? .infinity : nil, alignment: .leading)
             }
         }
         .onDisappear {
