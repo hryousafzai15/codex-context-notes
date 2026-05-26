@@ -14,7 +14,7 @@ struct NotesPanelView: View {
                 commandPalette
             }
         }
-        .frame(width: 390, height: 530)
+        .frame(minWidth: 390, idealWidth: 390, maxWidth: .infinity, minHeight: 530, idealHeight: 530, maxHeight: .infinity)
         .background(GlassPanelBackground())
         .foregroundStyle(.white)
         .tint(.blue)

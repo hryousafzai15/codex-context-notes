@@ -39,7 +39,7 @@ final class NotesPanelController: NSObject, NSWindowDelegate {
     private func makePanel() -> NSPanel {
         let panel = NSPanel(
             contentRect: NSRect(x: 0, y: 0, width: 390, height: 530),
-            styleMask: [.titled, .closable, .fullSizeContentView],
+            styleMask: [.titled, .closable, .resizable, .fullSizeContentView],
             backing: .buffered,
             defer: false
         )
@@ -56,7 +56,6 @@ final class NotesPanelController: NSObject, NSWindowDelegate {
         panel.isOpaque = false
         panel.hasShadow = true
         panel.minSize = NSSize(width: 390, height: 530)
-        panel.maxSize = NSSize(width: 390, height: 530)
         panel.collectionBehavior = [.fullScreenAuxiliary]
         panel.contentView = NSHostingView(rootView: NotesPanelView(model: model))
         panel.delegate = self
@@ -76,7 +75,7 @@ final class NotesPanelController: NSObject, NSWindowDelegate {
     }
 
     private func isUsableSavedFrame(_ frame: NSRect) -> Bool {
-        guard frame.width >= 380, frame.width <= 430, frame.height >= 500, frame.height <= 560 else {
+        guard frame.width >= 390, frame.height >= 530 else {
             return false
         }
 
@@ -91,6 +90,10 @@ final class NotesPanelController: NSObject, NSWindowDelegate {
     }
 
     func windowDidMove(_ notification: Notification) {
+        UserDefaults.standard.set(NSStringFromRect(panel.frame), forKey: "panelFrame")
+    }
+
+    func windowDidResize(_ notification: Notification) {
         UserDefaults.standard.set(NSStringFromRect(panel.frame), forKey: "panelFrame")
     }
 }
