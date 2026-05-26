@@ -10,6 +10,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var panelController: NotesPanelController?
     private var hotKeyObserver: NSObjectProtocol?
     private var shortcutSelfTestObserver: NSObjectProtocol?
+    private var hotKeyChangeObserver: NSObjectProtocol?
     private var lastShortcutToggleAt = Date.distantPast
     private var contextRefreshTask: Task<Void, Never>?
 
@@ -32,6 +33,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         hotKeyManager.register()
         detector.prewarm()
+
+        hotKeyChangeObserver = NotificationCenter.default.addObserver(
+            forName: .codexContextNotesHotKeyChanged,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            AppLogger.write("hotkey changed")
+            Task { @MainActor in
+                self?.hotKeyManager.register()
+            }
+        }
 
         shortcutSelfTestObserver = NotificationCenter.default.addObserver(
             forName: .codexContextNotesShortcutSelfTestRequested,
@@ -77,11 +89,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func openPanelFromShortcut() {
+        panelController?.beginContextRefresh()
         panelController?.present()
         refreshDetectedContext()
     }
 
     private func showPanel() {
+        panelController?.beginContextRefresh()
         panelController?.present()
         refreshDetectedContext()
     }

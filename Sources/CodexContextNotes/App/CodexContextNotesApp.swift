@@ -9,7 +9,6 @@ struct CodexContextNotesApp: App {
             Button("Open Current Context") {
                 appDelegate.showPanelFromMenu()
             }
-            .keyboardShortcut("n", modifiers: [.control, .option])
 
             Button("Test Shortcut Path") {
                 appDelegate.runShortcutSelfTestFromMenu()

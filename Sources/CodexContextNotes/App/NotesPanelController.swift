@@ -28,6 +28,10 @@ final class NotesPanelController: NSObject, NSWindowDelegate {
         AppLogger.write("panel visible \(panel.isVisible)")
     }
 
+    func beginContextRefresh() {
+        model.beginContextRefresh()
+    }
+
     func close() {
         panel.orderOut(nil)
     }

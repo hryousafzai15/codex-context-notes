@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 struct NotesPanelView: View {
@@ -28,7 +29,9 @@ struct NotesPanelView: View {
 
             ScrollView {
                 VStack(spacing: 10) {
-                    if activeSection == .none && !model.hasExistingContent {
+                    if model.isLoadingContext {
+                        loadingState
+                    } else if activeSection == .none && !model.hasExistingContent {
                         emptyStartRow
                     } else if activeSection == .note {
                         expandedNote
@@ -82,18 +85,18 @@ struct NotesPanelView: View {
                             .font(.system(size: 11, weight: .semibold))
                             .foregroundStyle(.white.opacity(0.72))
 
-                        Text("Auto-detected from \(model.note.context.sourceAppName)")
+                        Text(model.isLoadingContext ? "Detecting Codex context" : "Auto-detected from \(model.note.context.sourceAppName)")
                             .font(.caption2.weight(.semibold))
                             .foregroundStyle(.white.opacity(0.56))
                             .lineLimit(1)
                     }
 
-                    Text(model.note.context.displayTitle)
+                    Text(model.isLoadingContext ? "Loading current context" : model.note.context.displayTitle)
                         .font(.system(size: 23, weight: .semibold))
                         .lineLimit(1)
                         .minimumScaleFactor(0.68)
 
-                    Text(model.note.context.displaySubtitle)
+                    Text(model.isLoadingContext ? "Preparing notes for the active Codex chat..." : model.note.context.displaySubtitle)
                         .font(.caption)
                         .foregroundStyle(.white.opacity(0.58))
                         .lineLimit(1)
@@ -102,21 +105,56 @@ struct NotesPanelView: View {
 
                 Spacer(minLength: 8)
 
-                VStack(alignment: .trailing, spacing: 12) {
-                    Text("⌃⌥N")
-                        .font(.caption2.monospaced().weight(.semibold))
-                        .foregroundStyle(.white.opacity(0.58))
-
-                    Image(systemName: "arrow.up.left.and.arrow.down.right")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.white.opacity(0.46))
+                Button {
+                    NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+                    NSApp.activate(ignoringOtherApps: true)
+                } label: {
+                    Image(systemName: "gearshape")
+                        .font(.system(size: 13, weight: .semibold))
+                        .frame(width: 30, height: 30)
+                        .background(Color.white.opacity(0.08), in: Circle())
+                        .overlay {
+                            Circle()
+                                .strokeBorder(.white.opacity(0.12), lineWidth: 1)
+                        }
                 }
-                .padding(.top, 26)
+                .buttonStyle(.plain)
+                .help("Settings")
             }
         }
         .padding(.horizontal, 18)
         .padding(.top, 36)
         .padding(.bottom, 10)
+    }
+
+    private var loadingState: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 10) {
+                ProgressView()
+                    .controlSize(.small)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Finding the active Codex chat")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.white.opacity(0.78))
+                    Text("Your notes will appear as soon as the context is ready.")
+                        .font(.caption)
+                        .foregroundStyle(.white.opacity(0.46))
+                }
+
+                Spacer()
+            }
+            .padding(14)
+            .paletteSurface(cornerRadius: 12)
+
+            ForEach(0..<3, id: \.self) { _ in
+                RoundedRectangle(cornerRadius: 11, style: .continuous)
+                    .fill(.ultraThinMaterial)
+                    .overlay(Color.white.opacity(0.035))
+                    .frame(height: 42)
+                    .redacted(reason: .placeholder)
+            }
+        }
     }
 
     private var emptyStartRow: some View {

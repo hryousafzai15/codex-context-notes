@@ -13,6 +13,7 @@ final class NotesPanelModel: ObservableObject {
     @Published var newReminderText = ""
     @Published var newReminderDueText = ""
     @Published var statusText = "Private until you insert it."
+    @Published var isLoadingContext = true
 
     private let repository: NotesRepository
     private let promptSender: CodexPromptSender
@@ -56,7 +57,13 @@ final class NotesPanelModel: ObservableObject {
         note = repository.note(for: context)
         selectedTodoIDs = Set(note.todos.filter { !$0.isDone }.map(\.id))
         selectedReminderIDs = Set(note.reminders.map(\.id))
+        isLoadingContext = false
         statusText = hasExistingContent ? "Loaded saved notes for this context." : "No saved notes yet. Add the first one."
+    }
+
+    func beginContextRefresh() {
+        isLoadingContext = true
+        statusText = "Detecting current Codex context..."
     }
 
     func save() {

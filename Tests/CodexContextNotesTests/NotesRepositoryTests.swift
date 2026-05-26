@@ -1,4 +1,5 @@
 import Foundation
+import Carbon.HIToolbox
 import Testing
 @testable import CodexContextNotes
 
@@ -84,6 +85,16 @@ import Testing
     #expect(!prompt.contains("Keep this todo private"))
     #expect(prompt.contains("Send this follow-up"))
     #expect(!prompt.contains("Keep this follow-up private"))
+}
+
+@Test func appShortcutDefaultDisplaysAndMatchesCarbonModifiers() {
+    let shortcut = AppShortcut.default
+
+    #expect(shortcut.keyCode == UInt32(kVK_ANSI_N))
+    #expect(shortcut.displayName == "Control-Option-N")
+    #expect(shortcut.carbonModifiers & UInt32(controlKey) != 0)
+    #expect(shortcut.carbonModifiers & UInt32(optionKey) != 0)
+    #expect(shortcut.carbonModifiers & UInt32(cmdKey) == 0)
 }
 
 @Test func storageKeyIncludesProjectPathToAvoidRelativeFileCollisions() {
