@@ -2,7 +2,8 @@
 set -euo pipefail
 
 MODE="${1:-run}"
-APP_NAME="CodexContextNotes"
+PRODUCT_NAME="CodexContextNotes"
+APP_NAME="Noto"
 BUNDLE_ID="${CODEX_CONTEXT_NOTES_BUNDLE_ID:-com.hussainrehman.CodexContextNotes}"
 MIN_SYSTEM_VERSION="14.0"
 
@@ -16,9 +17,13 @@ INFO_PLIST="$APP_CONTENTS/Info.plist"
 VERSION_FILE="$ROOT_DIR/VERSION"
 
 cd "$ROOT_DIR"
+pkill -x "Noto" >/dev/null 2>&1 || true
 pkill -x "$APP_NAME" >/dev/null 2>&1 || true
+pkill -x "$PRODUCT_NAME" >/dev/null 2>&1 || true
+pkill -f "/Noto.app/Contents/MacOS/Noto" >/dev/null 2>&1 || true
+pkill -f "/CodexContextNotes.app/Contents/MacOS/CodexContextNotes" >/dev/null 2>&1 || true
 pkill -f "$ROOT_DIR/.*/$APP_NAME.app/Contents/MacOS/$APP_NAME" >/dev/null 2>&1 || true
-pkill -f "$ROOT_DIR/.build/.*/$APP_NAME" >/dev/null 2>&1 || true
+pkill -f "$ROOT_DIR/.build/.*/$PRODUCT_NAME" >/dev/null 2>&1 || true
 
 APP_VERSION="${CODEX_CONTEXT_NOTES_VERSION:-}"
 if [[ -z "$APP_VERSION" && -f "$VERSION_FILE" ]]; then
@@ -28,11 +33,11 @@ APP_VERSION="${APP_VERSION:-0.1.0}"
 APP_BUILD="${CODEX_CONTEXT_NOTES_BUILD:-$(date -u +%Y%m%d%H%M)}"
 
 swift build
-BUILD_BINARY="$(swift build --show-bin-path)/$APP_NAME"
+BUILD_BINARY="$(swift build --show-bin-path)/$PRODUCT_NAME"
 
 rm -rf "$APP_BUNDLE"
 mkdir -p "$APP_MACOS"
-find "$DIST_DIR" -maxdepth 1 -type d \( -name "$APP_NAME*.app" -o -name "Codex Context Notes*.app" \) ! -name "$APP_NAME.app" -exec rm -rf {} +
+find "$DIST_DIR" -maxdepth 1 -type d \( -name "Noto*.app" -o -name "CodexContextNotes*.app" -o -name "Codex Context Notes*.app" \) ! -name "$APP_NAME.app" -exec rm -rf {} +
 cp "$BUILD_BINARY" "$APP_BINARY"
 chmod +x "$APP_BINARY"
 
@@ -42,7 +47,7 @@ cat >"$INFO_PLIST" <<PLIST
 <plist version="1.0">
 <dict>
   <key>CFBundleDisplayName</key>
-  <string>Codex Context Notes</string>
+  <string>Noto</string>
   <key>CFBundleExecutable</key>
   <string>$APP_NAME</string>
   <key>CFBundleIdentifier</key>
@@ -52,7 +57,7 @@ cat >"$INFO_PLIST" <<PLIST
   <key>CFBundleVersion</key>
   <string>$APP_BUILD</string>
   <key>CFBundleName</key>
-  <string>$APP_NAME</string>
+  <string>Noto</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>LSMinimumSystemVersion</key>

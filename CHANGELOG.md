@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented here.
 
+## 0.5.0 - 2026-05-26
+
+- Rebranded the app as Noto with a blue notebook mascot in the panel and settings UI.
+- Renamed the launched app bundle and process to Noto while keeping the bundle id stable for Accessibility trust.
+- Hardened the run script to remove old build outputs and stop old Noto/CodexContextNotes processes before launching.
+- Moved Codex context detection off the main actor and added a timeout fallback so the panel does not stay stuck loading.
+
 ## 0.4.7 - 2026-05-26
 
 - Made the Settings shortcut section responsive so shortcut text and controls stack cleanly at compact widths.

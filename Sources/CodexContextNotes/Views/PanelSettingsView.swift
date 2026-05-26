@@ -52,13 +52,15 @@ struct PanelSettingsView: View {
             .buttonStyle(.plain)
             .help("Back to notes")
 
+            NotoMascotView(size: 42)
+
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 6) {
                     Circle()
                         .fill(Color.green)
                         .frame(width: 7, height: 7)
 
-                    Text("Panel settings")
+                    Text("Noto settings")
                         .font(.caption2.weight(.semibold))
                         .foregroundStyle(.white.opacity(0.56))
                 }
@@ -66,7 +68,7 @@ struct PanelSettingsView: View {
                 Text("Settings")
                     .font(.system(size: 23, weight: .semibold))
 
-                Text("Shortcut, tracking, and local privacy")
+                Text("Shortcut, tracking, and private local notes")
                     .font(.caption)
                     .foregroundStyle(.white.opacity(0.58))
                     .lineLimit(1)
@@ -115,7 +117,7 @@ struct PanelSettingsView: View {
             Text("Open notes panel")
                 .font(.callout.weight(.semibold))
 
-            Text("Choose the key combination that opens and closes this panel.")
+            Text("Choose the key combination that opens and closes Noto.")
                 .font(.caption)
                 .foregroundStyle(.white.opacity(0.52))
                 .fixedSize(horizontal: false, vertical: true)
@@ -158,7 +160,7 @@ struct PanelSettingsView: View {
             detail: accessibilityTrusted ? "Enabled" : "Permission needed",
             detailColor: accessibilityTrusted ? .green : .orange
         ) {
-            Text(accessibilityTrusted ? "Codex chat and project tracking can read the active window." : "Enable Accessibility so the app can detect the currently selected Codex chat and project.")
+            Text(accessibilityTrusted ? "Noto can read the active Codex window to attach notes to the right context." : "Enable Accessibility so Noto can detect the currently selected Codex chat and project.")
                 .font(.caption)
                 .foregroundStyle(.white.opacity(0.58))
                 .fixedSize(horizontal: false, vertical: true)
@@ -183,7 +185,7 @@ struct PanelSettingsView: View {
 
     private var privacySection: some View {
         SettingsCard(systemImage: "lock", title: "Privacy", detail: "Local only", detailColor: .blue) {
-            Text("Notes stay in Application Support. They are not sent to Codex until you press Insert into Codex.")
+            Text("Noto stores notes in Application Support. They are not sent to Codex until you press Insert into Codex.")
                 .font(.caption)
                 .foregroundStyle(.white.opacity(0.58))
                 .fixedSize(horizontal: false, vertical: true)

@@ -118,22 +118,40 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func refreshDetectedContext() {
         contextRefreshTask?.cancel()
-        contextRefreshTask = Task { @MainActor in
+        let detector = self.detector
+        contextRefreshTask = Task {
             guard !Task.isCancelled else {
                 return
             }
 
             let startedAt = Date()
-            let context = detector.detect()
+            let context = await Self.detectContext(detector: detector)
             let duration = Date().timeIntervalSince(startedAt)
 
             guard !Task.isCancelled else {
                 return
             }
 
-            AppLogger.write("showPanel context \(context.displaySubtitle) detection \(String(format: "%.3f", duration))s")
-            panelController?.show(context: context)
+            await MainActor.run { [weak self] in
+                AppLogger.write("showPanel context \(context.displaySubtitle) detection \(String(format: "%.3f", duration))s")
+                self?.panelController?.show(context: context)
+            }
         }
     }
 
+    private nonisolated static func detectContext(detector: CodexContextDetector) async -> CodexContext {
+        await withTaskGroup(of: CodexContext.self) { group in
+            group.addTask {
+                detector.detect()
+            }
+            group.addTask {
+                try? await Task.sleep(nanoseconds: 2_500_000_000)
+                return CodexContextDetector.fastFallbackContext()
+            }
+
+            let context = await group.next() ?? .fallback()
+            group.cancelAll()
+            return context
+        }
+    }
 }

@@ -80,13 +80,15 @@ struct NotesPanelView: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(alignment: .top, spacing: 10) {
+                NotoMascotView(size: 46)
+
                 VStack(alignment: .leading, spacing: 6) {
                     HStack(spacing: 6) {
-                        Image(systemName: "sparkle")
-                            .font(.system(size: 11, weight: .semibold))
-                            .foregroundStyle(.white.opacity(0.72))
+                        Circle()
+                            .fill(Color.green)
+                            .frame(width: 7, height: 7)
 
-                        Text(model.isLoadingContext ? "Detecting Codex context" : "Auto-detected from \(model.note.context.sourceAppName)")
+                        Text(model.isLoadingContext ? "Noto is finding Codex" : "Noto attached to \(model.note.context.sourceAppName)")
                             .font(.caption2.weight(.semibold))
                             .foregroundStyle(.white.opacity(0.56))
                             .lineLimit(1)
@@ -172,7 +174,7 @@ struct NotesPanelView: View {
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.white.opacity(0.72))
 
-                    Text("Start with a note, todo, or follow-up.")
+                    Text("Noto can hold a note, todo, or follow-up here.")
                         .font(.caption)
                         .foregroundStyle(.white.opacity(0.46))
                 }

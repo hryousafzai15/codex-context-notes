@@ -54,7 +54,7 @@ final class NotesPanelController: NSObject, NSWindowDelegate {
             backing: .buffered,
             defer: false
         )
-        panel.title = "Codex Context Notes"
+        panel.title = "Noto"
         panel.appearance = NSAppearance(named: .vibrantDark)
         panel.titleVisibility = .hidden
         panel.titlebarAppearsTransparent = true

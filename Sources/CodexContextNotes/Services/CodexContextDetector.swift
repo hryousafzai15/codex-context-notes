@@ -2,7 +2,8 @@ import AppKit
 import CoreGraphics
 import Foundation
 
-final class CodexContextDetector {
+final class CodexContextDetector: @unchecked Sendable {
+    private let detectionQueue = DispatchQueue(label: "com.hussainrehman.Noto.context-detection")
     private let sessionIndexReader: CodexSessionIndexReader
     private let accessibilityReader: CodexAccessibilityContextReader
 
@@ -19,6 +20,35 @@ final class CodexContextDetector {
     }
 
     func detect() -> CodexContext {
+        detectionQueue.sync {
+            detectUnlocked()
+        }
+    }
+
+    static func fastFallbackContext(now: Date = Date()) -> CodexContext {
+        let codexApp = NSWorkspace.shared.runningApplications.first { app in
+            app.bundleIdentifier == "com.openai.codex" || app.localizedName == "Codex"
+        }
+        let session = CodexSessionIndexReader().latestUserSession(includeRecentFile: false)
+
+        if codexApp != nil, let session {
+            return CodexContext(
+                projectName: session.cwd.map { URL(fileURLWithPath: $0).lastPathComponent } ?? "Current Codex project",
+                projectPath: session.cwd,
+                chatTitle: session.threadName,
+                chatId: session.id,
+                filePath: session.recentFilePath,
+                sourceAppName: "Codex",
+                sourceWindowTitle: nil,
+                detectionSummary: "Latest Codex session",
+                detectedAt: now
+            )
+        }
+
+        return .fallback(now: now)
+    }
+
+    private func detectUnlocked() -> CodexContext {
         let codexApp = NSWorkspace.shared.runningApplications.first { app in
             app.bundleIdentifier == "com.openai.codex" || app.localizedName == "Codex"
         }

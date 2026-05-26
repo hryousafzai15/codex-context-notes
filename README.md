@@ -1,8 +1,7 @@
-# Codex Context Notes
+# Noto
 
-Codex Context Notes is a lightweight native macOS companion for keeping private
-notes, todos, and follow-ups attached to the Codex chat or project you are
-working in.
+Noto is a lightweight native macOS companion for keeping private notes, todos,
+and follow-ups attached to the Codex chat or project you are working in.
 
 Notes stay local until you explicitly choose **Insert into Codex**. The app is designed
 for people who want a memory layer beside Codex without automatically adding
@@ -16,8 +15,8 @@ private thoughts to every prompt.
 - Auto-detect the active Codex chat/project when Accessibility permission is
   enabled.
 - Save private notes, todos, and follow-ups per Codex context.
-- Choose exactly which todos and follow-ups are included before sending.
-- Review what will be inserted before it goes into the Codex composer.
+- Choose exactly which todos and follow-ups are included before insertion.
+- Insert selected notes directly into the Codex composer.
 - Store all notes locally in Application Support.
 - Keep a stable signed app identity during local development so macOS
   Accessibility trust is not reset on every rebuild.
@@ -53,7 +52,7 @@ swift test
 
 ## Using the App
 
-1. Start Codex Context Notes.
+1. Start Noto.
 2. Open the Codex desktop app.
 3. Press the configured shortcut. The default is `Control` + `Option` + `N`.
 4. Add a note, todo, or follow-up.
