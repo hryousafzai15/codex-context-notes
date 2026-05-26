@@ -7,12 +7,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let detector = CodexContextDetector()
     private let promptSender = CodexPromptSender()
     private let hotKeyManager = HotKeyManager()
-    private let settingsWindowController = SettingsWindowController()
     private var panelController: NotesPanelController?
     private var hotKeyObserver: NSObjectProtocol?
     private var shortcutSelfTestObserver: NSObjectProtocol?
     private var hotKeyChangeObserver: NSObjectProtocol?
-    private var settingsObserver: NSObjectProtocol?
     private var lastShortcutToggleAt = Date.distantPast
     private var contextRefreshTask: Task<Void, Never>?
 
@@ -44,17 +42,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             AppLogger.write("hotkey changed")
             Task { @MainActor in
                 self?.hotKeyManager.register()
-            }
-        }
-
-        settingsObserver = NotificationCenter.default.addObserver(
-            forName: .codexContextNotesSettingsRequested,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            AppLogger.write("settings requested")
-            Task { @MainActor in
-                self?.showSettingsFromMenu()
             }
         }
 
@@ -97,7 +84,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func showSettingsFromMenu() {
-        settingsWindowController.show()
+        panelController?.showSettings()
     }
 
     private func handleShortcutPressed() {

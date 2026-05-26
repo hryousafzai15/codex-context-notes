@@ -10,6 +10,10 @@ struct NotesPanelView: View {
         ZStack {
             if showingReview {
                 reviewScreen
+            } else if model.isShowingSettings {
+                PanelSettingsView {
+                    model.hideSettings()
+                }
             } else {
                 commandPalette
             }
@@ -106,7 +110,7 @@ struct NotesPanelView: View {
                 Spacer(minLength: 8)
 
                 Button {
-                    NotificationCenter.default.post(name: .codexContextNotesSettingsRequested, object: nil)
+                    model.showSettings()
                 } label: {
                     Image(systemName: "gearshape")
                         .font(.system(size: 13, weight: .semibold))
