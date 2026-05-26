@@ -57,22 +57,12 @@ struct GlassPanelBackground: View {
 }
 
 extension View {
-    @ViewBuilder
     func glassCard(cornerRadius: CGFloat) -> some View {
-        if #available(macOS 26.0, *) {
-            self.glassEffect(.regular, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-        } else {
-            self.background(.regularMaterial, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-        }
+        self.background(.regularMaterial, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
     }
 
-    @ViewBuilder
     func glassCapsule() -> some View {
-        if #available(macOS 26.0, *) {
-            self.glassEffect(.regular, in: Capsule())
-        } else {
-            self.background(.thinMaterial, in: Capsule())
-        }
+        self.background(.thinMaterial, in: Capsule())
     }
 
     func frostedSurface(cornerRadius: CGFloat = 18, opacity: Double = 0.10) -> some View {
