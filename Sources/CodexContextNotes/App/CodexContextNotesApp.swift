@@ -5,7 +5,7 @@ struct CodexContextNotesApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
     var body: some Scene {
-        MenuBarExtra("Codex Notes", systemImage: "note.text") {
+        MenuBarExtra("Noto", systemImage: "book.closed") {
             Button("Open Current Context") {
                 appDelegate.showPanelFromMenu()
             }
