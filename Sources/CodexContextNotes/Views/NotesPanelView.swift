@@ -15,7 +15,7 @@ struct NotesPanelView: View {
                 commandPalette
             }
         }
-        .frame(minWidth: 390, idealWidth: 390, maxWidth: .infinity, minHeight: 530, idealHeight: 530, maxHeight: .infinity)
+        .frame(minWidth: 470, idealWidth: 470, maxWidth: .infinity, minHeight: 530, idealHeight: 530, maxHeight: .infinity)
         .background(GlassPanelBackground())
         .foregroundStyle(.white)
         .tint(.blue)
@@ -445,33 +445,27 @@ struct NotesPanelView: View {
     }
 
     private var footer: some View {
-        HStack(spacing: 8) {
-            FooterChip(title: "Note", systemImage: "note.text", isOn: model.includeNote) {
+        HStack(spacing: 7) {
+            FooterChip(title: "Note", systemImage: "note.text", width: 74, isOn: model.includeNote) {
                 model.includeNote.toggle()
                 activeSection = .note
             }
 
-            FooterChip(title: "Todos", systemImage: "list.bullet", isOn: model.includeTodos) {
+            FooterChip(title: "Todos", systemImage: "list.bullet", width: 84, isOn: model.includeTodos) {
                 model.includeTodos.toggle()
                 activeSection = .todos
             }
 
-            FooterChip(title: "Follow-ups", systemImage: "calendar", isOn: model.includeReminders) {
+            FooterChip(title: "Follow-ups", systemImage: "calendar", width: 112, isOn: model.includeReminders) {
                 model.includeReminders.toggle()
                 activeSection = .followUps
             }
 
-            Spacer(minLength: 8)
+            Spacer(minLength: 4)
 
-            Button {
+            InsertActionButton {
                 model.insertIntoCodex()
-            } label: {
-                Label("Insert into Codex", systemImage: "sparkle")
-                    .font(.caption.weight(.semibold))
-                    .frame(width: 126, height: 32)
             }
-            .buttonStyle(.borderedProminent)
-            .buttonBorderShape(.roundedRectangle(radius: 11))
         }
         .padding(.horizontal, 14)
         .padding(.top, 10)
@@ -493,6 +487,7 @@ private enum PanelSection {
 private struct FooterChip: View {
     var title: String
     var systemImage: String
+    var width: CGFloat
     var isOn: Bool
     var action: () -> Void
 
@@ -507,9 +502,9 @@ private struct FooterChip: View {
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.white.opacity(isOn ? 0.92 : 0.68))
                     .lineLimit(1)
+                    .minimumScaleFactor(0.88)
             }
-            .padding(.horizontal, 9)
-            .frame(height: 30)
+            .frame(width: width, height: 32)
             .background(isOn ? Color.white.opacity(0.15) : Color.white.opacity(0.07), in: Capsule())
             .overlay {
                 Capsule()
@@ -517,6 +512,46 @@ private struct FooterChip: View {
             }
         }
         .buttonStyle(.plain)
+    }
+}
+
+private struct InsertActionButton: View {
+    var action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 7) {
+                Image(systemName: "arrow.up.forward")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(.white)
+                    .frame(width: 20, height: 20)
+                    .background(Color.white.opacity(0.16), in: Circle())
+                    .overlay {
+                        Circle()
+                            .strokeBorder(.white.opacity(0.14), lineWidth: 1)
+                    }
+
+                Text("Insert into Codex")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.white.opacity(0.95))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.86)
+            }
+            .frame(width: 136, height: 32)
+            .background {
+                Capsule()
+                    .fill(.ultraThinMaterial)
+                    .overlay(Color.blue.opacity(0.20))
+                    .clipShape(Capsule())
+            }
+            .overlay {
+                Capsule()
+                    .strokeBorder(Color.blue.opacity(0.44), lineWidth: 1)
+            }
+            .shadow(color: .blue.opacity(0.22), radius: 10, y: 4)
+        }
+        .buttonStyle(.plain)
+        .help("Insert selected notes into Codex")
     }
 }
 
