@@ -14,8 +14,8 @@ struct CodexContextNotesApp: App {
                 appDelegate.runShortcutSelfTestFromMenu()
             }
 
-            SettingsLink {
-                Text("Settings")
+            Button("Settings") {
+                appDelegate.showSettingsFromMenu()
             }
 
             Divider()
@@ -24,10 +24,6 @@ struct CodexContextNotesApp: App {
                 NSApp.terminate(nil)
             }
             .keyboardShortcut("q")
-        }
-
-        Settings {
-            SettingsView()
         }
     }
 }

@@ -106,8 +106,7 @@ struct NotesPanelView: View {
                 Spacer(minLength: 8)
 
                 Button {
-                    NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-                    NSApp.activate(ignoringOtherApps: true)
+                    NotificationCenter.default.post(name: .codexContextNotesSettingsRequested, object: nil)
                 } label: {
                     Image(systemName: "gearshape")
                         .font(.system(size: 13, weight: .semibold))

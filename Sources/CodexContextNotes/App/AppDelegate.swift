@@ -7,10 +7,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let detector = CodexContextDetector()
     private let promptSender = CodexPromptSender()
     private let hotKeyManager = HotKeyManager()
+    private let settingsWindowController = SettingsWindowController()
     private var panelController: NotesPanelController?
     private var hotKeyObserver: NSObjectProtocol?
     private var shortcutSelfTestObserver: NSObjectProtocol?
     private var hotKeyChangeObserver: NSObjectProtocol?
+    private var settingsObserver: NSObjectProtocol?
     private var lastShortcutToggleAt = Date.distantPast
     private var contextRefreshTask: Task<Void, Never>?
 
@@ -45,6 +47,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
+        settingsObserver = NotificationCenter.default.addObserver(
+            forName: .codexContextNotesSettingsRequested,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            AppLogger.write("settings requested")
+            Task { @MainActor in
+                self?.showSettingsFromMenu()
+            }
+        }
+
         shortcutSelfTestObserver = NotificationCenter.default.addObserver(
             forName: .codexContextNotesShortcutSelfTestRequested,
             object: nil,
@@ -62,6 +75,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
+        if CommandLine.arguments.contains("--open-settings") {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
+                self?.showSettingsFromMenu()
+            }
+        }
+
         if CommandLine.arguments.contains("--shortcut-self-test") {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
                 self?.runShortcutSelfTestFromMenu()
@@ -75,6 +94,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func runShortcutSelfTestFromMenu() {
         hotKeyManager.runSelfTest()
+    }
+
+    func showSettingsFromMenu() {
+        settingsWindowController.show()
     }
 
     private func handleShortcutPressed() {

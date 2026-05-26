@@ -266,4 +266,5 @@ extension Notification.Name {
     static let codexContextNotesHotKeyPressed = Notification.Name("codexContextNotesHotKeyPressed")
     static let codexContextNotesShortcutSelfTestRequested = Notification.Name("codexContextNotesShortcutSelfTestRequested")
     static let codexContextNotesHotKeyChanged = Notification.Name("codexContextNotesHotKeyChanged")
+    static let codexContextNotesSettingsRequested = Notification.Name("codexContextNotesSettingsRequested")
 }
