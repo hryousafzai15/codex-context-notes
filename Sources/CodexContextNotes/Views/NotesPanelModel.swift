@@ -14,6 +14,7 @@ final class NotesPanelModel: ObservableObject {
     @Published var newReminderDueText = ""
     @Published var statusText = "Private until you insert it."
     @Published var isLoadingContext = true
+    @Published var isShowingSettings = false
 
     private let repository: NotesRepository
     private let promptSender: CodexPromptSender
@@ -62,8 +63,18 @@ final class NotesPanelModel: ObservableObject {
     }
 
     func beginContextRefresh() {
+        isShowingSettings = false
         isLoadingContext = true
         statusText = "Detecting current Codex context..."
+    }
+
+    func showSettings() {
+        isShowingSettings = true
+        isLoadingContext = false
+    }
+
+    func hideSettings() {
+        isShowingSettings = false
     }
 
     func save() {

@@ -32,6 +32,14 @@ final class NotesPanelController: NSObject, NSWindowDelegate {
         model.beginContextRefresh()
     }
 
+    func showSettings() {
+        restoreFrameOrCenter()
+        model.showSettings()
+        NSApp.activate(ignoringOtherApps: true)
+        panel.makeKeyAndOrderFront(nil)
+        AppLogger.write("panel settings visible \(panel.isVisible)")
+    }
+
     func close() {
         panel.orderOut(nil)
     }
