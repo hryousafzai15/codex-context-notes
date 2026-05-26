@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented here.
 
+## 0.5.1 - 2026-05-26
+
+- Replaced the drawn Noto mascot with the approved option 2 tiny notebook logo from the concept sheet.
+- Bundled the Noto logo asset into the app so packaged builds use the same approved artwork.
+
 ## 0.5.0 - 2026-05-26
 
 - Rebranded the app as Noto with a blue notebook mascot in the panel and settings UI.

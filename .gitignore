@@ -9,6 +9,8 @@ DerivedData/
 *.tmp
 *.swp
 *.png
+!Sources/CodexContextNotes/Resources/
+!Sources/CodexContextNotes/Resources/*.png
 *.jpg
 *.jpeg
 *.webp
