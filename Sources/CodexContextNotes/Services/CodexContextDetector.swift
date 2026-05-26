@@ -26,9 +26,10 @@ final class CodexContextDetector {
         if let codexApp,
            let hints = accessibilityReader.activeWindowHints(for: codexApp.processIdentifier) {
             let session = sessionIndexReader.userSession(matchingThreadName: hints.chatTitle)
+            let projectName = session == nil ? accessibilityReader.projectName(containing: hints.chatTitle, for: codexApp.processIdentifier) : nil
             return Self.context(
                 fromActiveChatTitle: hints.chatTitle,
-                projectName: hints.projectName,
+                projectName: projectName,
                 appName: codexApp.localizedName ?? "Codex",
                 session: session
             )

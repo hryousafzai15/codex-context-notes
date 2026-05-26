@@ -57,19 +57,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         if CommandLine.arguments.contains("--open-panel") {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
+            DispatchQueue.main.async { [weak self] in
                 self?.showPanelFromMenu()
             }
         }
 
         if CommandLine.arguments.contains("--open-settings") {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
+            DispatchQueue.main.async { [weak self] in
                 self?.showSettingsFromMenu()
             }
         }
 
         if CommandLine.arguments.contains("--shortcut-self-test") {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
+            DispatchQueue.main.async { [weak self] in
                 self?.runShortcutSelfTestFromMenu()
             }
         }
@@ -119,8 +119,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func refreshDetectedContext() {
         contextRefreshTask?.cancel()
         contextRefreshTask = Task { @MainActor in
-            await Task.yield()
-
             guard !Task.isCancelled else {
                 return
             }
