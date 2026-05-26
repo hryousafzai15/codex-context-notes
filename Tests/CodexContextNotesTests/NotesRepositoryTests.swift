@@ -200,3 +200,40 @@ import Testing
     #expect(context.noteKindLabel == "Chat note")
     #expect(context.detectionSummary == "Active Codex chat")
 }
+
+@Test func detectorFallsBackToProjectHintWhenSessionHasNoCwd() {
+    let session = CodexSessionSnapshot(
+        id: "active-session",
+        threadName: "Launch readiness",
+        cwd: nil,
+        recentFilePath: nil,
+        updatedAt: Date(timeIntervalSince1970: 0)
+    )
+
+    let context = CodexContextDetector.context(
+        fromActiveChatTitle: "Launch readiness",
+        projectName: "Flightona",
+        appName: "Codex",
+        session: session,
+        now: Date(timeIntervalSince1970: 0)
+    )
+
+    #expect(context.projectName == "Flightona")
+    #expect(context.projectPath == nil)
+    #expect(context.chatTitle == "Launch readiness")
+    #expect(context.chatId == "active-session")
+}
+
+@MainActor
+@Test func settingsDoesNotClearPendingContextLoadingState() {
+    let tempURL = FileManager.default.temporaryDirectory
+        .appendingPathComponent(UUID().uuidString)
+        .appendingPathComponent("notes.json")
+    let model = NotesPanelModel(repository: NotesRepository(fileURL: tempURL), promptSender: CodexPromptSender())
+
+    model.beginContextRefresh()
+    model.showSettings()
+    model.hideSettings()
+
+    #expect(model.isLoadingContext)
+}

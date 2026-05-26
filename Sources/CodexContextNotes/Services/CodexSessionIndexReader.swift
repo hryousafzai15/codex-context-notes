@@ -8,8 +8,9 @@ struct CodexSessionSnapshot: Equatable {
     var updatedAt: Date
 }
 
-final class CodexSessionIndexReader {
+final class CodexSessionIndexReader: @unchecked Sendable {
     private let codexHome: URL
+    private let cacheLock = NSLock()
     private var sessionFileCache: [String: URL]?
 
     init(codexHome: URL = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".codex")) {
@@ -104,6 +105,9 @@ final class CodexSessionIndexReader {
     }
 
     private func sessionFileURL(for id: String) -> URL? {
+        cacheLock.lock()
+        defer { cacheLock.unlock() }
+
         if let sessionFileCache {
             return sessionFileCache[id]
         }

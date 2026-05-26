@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## 0.5.2 - 2026-05-26
+
+- Addressed Codex review feedback around context detection timeouts, cached fallback reads, session-reader synchronization, settings loading state, compact footer accessibility, and safer run-script process cleanup.
+
 ## 0.5.1 - 2026-05-26
 
 - Replaced the drawn Noto mascot with the approved option 2 tiny notebook logo from the concept sheet.

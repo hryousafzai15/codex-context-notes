@@ -4,6 +4,7 @@ import Foundation
 
 struct CodexActiveWindowHints: Equatable {
     var chatTitle: String
+    var projectName: String?
 }
 
 final class CodexAccessibilityContextReader {
@@ -34,8 +35,9 @@ final class CodexAccessibilityContextReader {
             return nil
         }
 
+        let projectName = projectName(containing: chatTitle, in: window)
         AppLogger.write("accessibility context active chat \(chatTitle)")
-        return CodexActiveWindowHints(chatTitle: chatTitle)
+        return CodexActiveWindowHints(chatTitle: chatTitle, projectName: projectName)
     }
 
     func projectName(containing chatTitle: String, for pid: pid_t) -> String? {

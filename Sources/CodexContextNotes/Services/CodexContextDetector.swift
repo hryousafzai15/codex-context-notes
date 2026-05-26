@@ -25,11 +25,18 @@ final class CodexContextDetector: @unchecked Sendable {
         }
     }
 
-    static func fastFallbackContext(now: Date = Date()) -> CodexContext {
+    func fastFallbackContext(now: Date = Date()) -> CodexContext {
+        Self.fastFallbackContext(sessionIndexReader: sessionIndexReader, now: now)
+    }
+
+    static func fastFallbackContext(
+        sessionIndexReader: CodexSessionIndexReader = CodexSessionIndexReader(),
+        now: Date = Date()
+    ) -> CodexContext {
         let codexApp = NSWorkspace.shared.runningApplications.first { app in
             app.bundleIdentifier == "com.openai.codex" || app.localizedName == "Codex"
         }
-        let session = CodexSessionIndexReader().latestUserSession(includeRecentFile: false)
+        let session = sessionIndexReader.latestUserSession(includeRecentFile: false)
 
         if codexApp != nil, let session {
             return CodexContext(
@@ -56,10 +63,9 @@ final class CodexContextDetector: @unchecked Sendable {
         if let codexApp,
            let hints = accessibilityReader.activeWindowHints(for: codexApp.processIdentifier) {
             let session = sessionIndexReader.userSession(matchingThreadName: hints.chatTitle)
-            let projectName = session == nil ? accessibilityReader.projectName(containing: hints.chatTitle, for: codexApp.processIdentifier) : nil
             return Self.context(
                 fromActiveChatTitle: hints.chatTitle,
-                projectName: projectName,
+                projectName: hints.projectName,
                 appName: codexApp.localizedName ?? "Codex",
                 session: session
             )
