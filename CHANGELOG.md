@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## 0.4.4 - 2026-05-26
+
+- Replaced the two-step Send to AI / Insert into Codex flow with one Insert into Codex action.
+
 ## 0.4.3 - 2026-05-26
 
 - Removed artificial startup waits from panel launch paths.

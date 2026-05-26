@@ -4,13 +4,10 @@ import SwiftUI
 struct NotesPanelView: View {
     @ObservedObject var model: NotesPanelModel
     @State private var activeSection: PanelSection = .none
-    @State private var showingReview = false
 
     var body: some View {
         ZStack {
-            if showingReview {
-                reviewScreen
-            } else if model.isShowingSettings {
+            if model.isShowingSettings {
                 PanelSettingsView {
                     model.hideSettings()
                 }
@@ -467,15 +464,11 @@ struct NotesPanelView: View {
             Spacer(minLength: 8)
 
             Button {
-                if model.promptPreview.isEmpty {
-                    model.insertIntoCodex()
-                } else {
-                    showingReview = true
-                }
+                model.insertIntoCodex()
             } label: {
-                Label("Send to AI", systemImage: "sparkle")
+                Label("Insert into Codex", systemImage: "sparkle")
                     .font(.caption.weight(.semibold))
-                    .frame(width: 94, height: 32)
+                    .frame(width: 126, height: 32)
             }
             .buttonStyle(.borderedProminent)
             .buttonBorderShape(.roundedRectangle(radius: 11))
@@ -483,110 +476,6 @@ struct NotesPanelView: View {
         .padding(.horizontal, 14)
         .padding(.top, 10)
         .padding(.bottom, 12)
-    }
-
-    private var reviewScreen: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 5) {
-                    Text("Review before sending")
-                        .font(.headline.weight(.semibold))
-
-                    Text("This is what will be sent to Codex.")
-                        .font(.caption)
-                        .foregroundStyle(.white.opacity(0.58))
-                }
-
-                Spacer()
-
-                Button {
-                    showingReview = false
-                } label: {
-                    Image(systemName: "xmark")
-                        .font(.caption.weight(.bold))
-                        .frame(width: 24, height: 24)
-                        .background(Color.white.opacity(0.08), in: Circle())
-                }
-                .buttonStyle(.plain)
-                .help("Close")
-            }
-
-            reviewBlock(
-                systemImage: "lock",
-                title: "Private note",
-                detail: "\(model.note.body.split(separator: "\n").count) paragraphs · \(model.note.body.count) chars",
-                content: model.note.body.isEmpty ? "No private note selected." : model.note.body
-            )
-
-            reviewRow(systemImage: "list.bullet", title: "Todos", detail: "\(model.selectedOpenTodoCount) selected")
-            reviewRow(systemImage: "calendar", title: "Follow-ups", detail: "\(model.selectedReminderCount) selected")
-            reviewRow(systemImage: "folder", title: "Include context", detail: model.note.context.noteKindLabel)
-
-            Spacer()
-
-            HStack(spacing: 10) {
-                Button("Cancel") {
-                    showingReview = false
-                }
-                .buttonStyle(.bordered)
-                .buttonBorderShape(.roundedRectangle(radius: 10))
-
-                Button {
-                    showingReview = false
-                    model.insertIntoCodex()
-                } label: {
-                    Label("Insert into Codex", systemImage: "sparkle")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                .buttonBorderShape(.roundedRectangle(radius: 10))
-            }
-        }
-        .padding(18)
-    }
-
-    private func reviewBlock(systemImage: String, title: String, detail: String, content: String) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Label(title, systemImage: systemImage)
-                    .font(.caption.weight(.semibold))
-                Spacer()
-                Text(detail)
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(.white.opacity(0.46))
-                Image(systemName: "chevron.down")
-                    .font(.caption2.weight(.bold))
-                    .foregroundStyle(.white.opacity(0.40))
-            }
-
-            Text(content)
-                .font(.caption)
-                .foregroundStyle(.white.opacity(0.76))
-                .lineLimit(5)
-                .lineSpacing(3)
-        }
-        .padding(12)
-        .paletteSurface(cornerRadius: 10)
-    }
-
-    private func reviewRow(systemImage: String, title: String, detail: String) -> some View {
-        HStack(spacing: 9) {
-            Label(title, systemImage: systemImage)
-                .font(.caption.weight(.semibold))
-
-            Spacer()
-
-            Text(detail)
-                .font(.caption2.weight(.semibold))
-                .foregroundStyle(.white.opacity(0.48))
-
-            Image(systemName: "chevron.right")
-                .font(.caption2.weight(.bold))
-                .foregroundStyle(.white.opacity(0.42))
-        }
-        .padding(.horizontal, 12)
-        .frame(height: 42)
-        .paletteSurface(cornerRadius: 10)
     }
 
     private var noteDetail: String {
@@ -647,7 +536,7 @@ private struct TodoRow: View {
                     .frame(width: 28, height: 28)
             }
             .buttonStyle(.plain)
-            .help(isSelectedForHandoff ? "Included in Send to AI" : "Include in Send to AI")
+            .help(isSelectedForHandoff ? "Included in Insert into Codex" : "Include in Insert into Codex")
 
             Button(action: onToggle) {
                 Image(systemName: todo.isDone ? "checkmark.circle.fill" : "circle")
@@ -697,7 +586,7 @@ private struct FollowUpRow: View {
                     .frame(width: 28, height: 28)
             }
             .buttonStyle(.plain)
-            .help(isSelectedForHandoff ? "Included in Send to AI" : "Include in Send to AI")
+            .help(isSelectedForHandoff ? "Included in Insert into Codex" : "Include in Insert into Codex")
 
             Text(reminder.text)
                 .font(.caption)
