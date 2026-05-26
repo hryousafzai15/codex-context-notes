@@ -9,14 +9,13 @@ struct CodexContextNotesApp: App {
             Button("Open Current Context") {
                 appDelegate.showPanelFromMenu()
             }
-            .keyboardShortcut("n", modifiers: [.control, .option])
 
             Button("Test Shortcut Path") {
                 appDelegate.runShortcutSelfTestFromMenu()
             }
 
-            SettingsLink {
-                Text("Settings")
+            Button("Settings") {
+                appDelegate.showSettingsFromMenu()
             }
 
             Divider()
@@ -25,10 +24,6 @@ struct CodexContextNotesApp: App {
                 NSApp.terminate(nil)
             }
             .keyboardShortcut("q")
-        }
-
-        Settings {
-            SettingsView()
         }
     }
 }

@@ -12,7 +12,7 @@ private thoughts to every prompt.
 
 ## Features
 
-- Open a compact notes palette with `Control` + `Option` + `N`.
+- Open a compact notes palette with a configurable global shortcut.
 - Auto-detect the active Codex chat/project when Accessibility permission is
   enabled.
 - Save private notes, todos, and follow-ups per Codex context.
@@ -55,7 +55,7 @@ swift test
 
 1. Start Codex Context Notes.
 2. Open the Codex desktop app.
-3. Press `Control` + `Option` + `N`.
+3. Press the configured shortcut. The default is `Control` + `Option` + `N`.
 4. Add a note, todo, or follow-up.
 5. Select the exact items you want to include.
 6. Press **Send to AI** and review the handoff.
@@ -108,6 +108,9 @@ Useful modes:
 
 The app version is stored in `VERSION`. Each build also gets a timestamp
 `CFBundleVersion`.
+
+The global shortcut is configurable in Settings. Open Settings from the menu bar
+app or the gear button in the panel.
 
 ### Signing
 

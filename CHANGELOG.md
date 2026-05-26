@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented here.
 
+## 0.4.0 - 2026-05-26
+
+- Added configurable global shortcut recording in Settings.
+- Added a settings button to the notes panel header.
+- Removed the hardcoded shortcut label from the panel.
+- Added a loading state while Codex context detection refreshes.
+
 ## 0.3.0 - 2026-05-26
 
 - Added compact command-palette notes panel.

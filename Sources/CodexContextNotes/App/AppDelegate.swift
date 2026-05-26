@@ -7,9 +7,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let detector = CodexContextDetector()
     private let promptSender = CodexPromptSender()
     private let hotKeyManager = HotKeyManager()
+    private let settingsWindowController = SettingsWindowController()
     private var panelController: NotesPanelController?
     private var hotKeyObserver: NSObjectProtocol?
     private var shortcutSelfTestObserver: NSObjectProtocol?
+    private var hotKeyChangeObserver: NSObjectProtocol?
+    private var settingsObserver: NSObjectProtocol?
     private var lastShortcutToggleAt = Date.distantPast
     private var contextRefreshTask: Task<Void, Never>?
 
@@ -33,6 +36,28 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         hotKeyManager.register()
         detector.prewarm()
 
+        hotKeyChangeObserver = NotificationCenter.default.addObserver(
+            forName: .codexContextNotesHotKeyChanged,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            AppLogger.write("hotkey changed")
+            Task { @MainActor in
+                self?.hotKeyManager.register()
+            }
+        }
+
+        settingsObserver = NotificationCenter.default.addObserver(
+            forName: .codexContextNotesSettingsRequested,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            AppLogger.write("settings requested")
+            Task { @MainActor in
+                self?.showSettingsFromMenu()
+            }
+        }
+
         shortcutSelfTestObserver = NotificationCenter.default.addObserver(
             forName: .codexContextNotesShortcutSelfTestRequested,
             object: nil,
@@ -47,6 +72,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if CommandLine.arguments.contains("--open-panel") {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
                 self?.showPanelFromMenu()
+            }
+        }
+
+        if CommandLine.arguments.contains("--open-settings") {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
+                self?.showSettingsFromMenu()
             }
         }
 
@@ -65,6 +96,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         hotKeyManager.runSelfTest()
     }
 
+    func showSettingsFromMenu() {
+        settingsWindowController.show()
+    }
+
     private func handleShortcutPressed() {
         let now = Date()
         guard now.timeIntervalSince(lastShortcutToggleAt) > 0.08 else {
@@ -77,11 +112,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func openPanelFromShortcut() {
+        panelController?.beginContextRefresh()
         panelController?.present()
         refreshDetectedContext()
     }
 
     private func showPanel() {
+        panelController?.beginContextRefresh()
         panelController?.present()
         refreshDetectedContext()
     }
