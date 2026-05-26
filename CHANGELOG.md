@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## 0.4.6 - 2026-05-26
+
+- Allowed the notes panel to be resized smaller while adapting footer controls for compact widths.
+
 ## 0.4.5 - 2026-05-26
 
 - Widened the notes panel and polished the footer controls so the note, todo, follow-up, and Insert into Codex actions stay readable.

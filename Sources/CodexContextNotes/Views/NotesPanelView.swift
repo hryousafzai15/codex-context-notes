@@ -15,7 +15,7 @@ struct NotesPanelView: View {
                 commandPalette
             }
         }
-        .frame(minWidth: 470, idealWidth: 470, maxWidth: .infinity, minHeight: 530, idealHeight: 530, maxHeight: .infinity)
+        .frame(minWidth: 260, idealWidth: 470, maxWidth: .infinity, minHeight: 360, idealHeight: 530, maxHeight: .infinity)
         .background(GlassPanelBackground())
         .foregroundStyle(.white)
         .tint(.blue)
@@ -445,31 +445,109 @@ struct NotesPanelView: View {
     }
 
     private var footer: some View {
+        ViewThatFits(in: .horizontal) {
+            regularFooter
+            compactFooter
+            stackedFooter
+        }
+        .padding(.horizontal, 14)
+        .padding(.top, 10)
+        .padding(.bottom, 12)
+    }
+
+    private var regularFooter: some View {
         HStack(spacing: 7) {
-            FooterChip(title: "Note", systemImage: "note.text", width: 74, isOn: model.includeNote) {
+            footerChip(title: "Note", systemImage: "note.text", width: 74, compact: false, isOn: model.includeNote) {
                 model.includeNote.toggle()
                 activeSection = .note
             }
 
-            FooterChip(title: "Todos", systemImage: "list.bullet", width: 84, isOn: model.includeTodos) {
+            footerChip(title: "Todos", systemImage: "list.bullet", width: 84, compact: false, isOn: model.includeTodos) {
                 model.includeTodos.toggle()
                 activeSection = .todos
             }
 
-            FooterChip(title: "Follow-ups", systemImage: "calendar", width: 112, isOn: model.includeReminders) {
+            footerChip(title: "Follow-ups", systemImage: "calendar", width: 112, compact: false, isOn: model.includeReminders) {
                 model.includeReminders.toggle()
                 activeSection = .followUps
             }
 
             Spacer(minLength: 4)
 
-            InsertActionButton {
+            InsertActionButton(mode: .full) {
                 model.insertIntoCodex()
             }
         }
-        .padding(.horizontal, 14)
-        .padding(.top, 10)
-        .padding(.bottom, 12)
+    }
+
+    private var compactFooter: some View {
+        HStack(spacing: 7) {
+            footerChip(title: "Note", systemImage: "note.text", width: 38, compact: true, isOn: model.includeNote) {
+                model.includeNote.toggle()
+                activeSection = .note
+            }
+
+            footerChip(title: "Todos", systemImage: "list.bullet", width: 38, compact: true, isOn: model.includeTodos) {
+                model.includeTodos.toggle()
+                activeSection = .todos
+            }
+
+            footerChip(title: "Follow-ups", systemImage: "calendar", width: 38, compact: true, isOn: model.includeReminders) {
+                model.includeReminders.toggle()
+                activeSection = .followUps
+            }
+
+            Spacer(minLength: 4)
+
+            InsertActionButton(mode: .short) {
+                model.insertIntoCodex()
+            }
+        }
+    }
+
+    private var stackedFooter: some View {
+        VStack(spacing: 8) {
+            HStack(spacing: 7) {
+                footerChip(title: "Note", systemImage: "note.text", width: 38, compact: true, isOn: model.includeNote) {
+                    model.includeNote.toggle()
+                    activeSection = .note
+                }
+
+                footerChip(title: "Todos", systemImage: "list.bullet", width: 38, compact: true, isOn: model.includeTodos) {
+                    model.includeTodos.toggle()
+                    activeSection = .todos
+                }
+
+                footerChip(title: "Follow-ups", systemImage: "calendar", width: 38, compact: true, isOn: model.includeReminders) {
+                    model.includeReminders.toggle()
+                    activeSection = .followUps
+                }
+
+                Spacer(minLength: 0)
+            }
+
+            InsertActionButton(mode: .wide) {
+                model.insertIntoCodex()
+            }
+        }
+    }
+
+    private func footerChip(
+        title: String,
+        systemImage: String,
+        width: CGFloat,
+        compact: Bool,
+        isOn: Bool,
+        action: @escaping () -> Void
+    ) -> some View {
+        FooterChip(
+            title: title,
+            systemImage: systemImage,
+            width: width,
+            compact: compact,
+            isOn: isOn,
+            action: action
+        )
     }
 
     private var noteDetail: String {
@@ -488,6 +566,7 @@ private struct FooterChip: View {
     var title: String
     var systemImage: String
     var width: CGFloat
+    var compact: Bool
     var isOn: Bool
     var action: () -> Void
 
@@ -498,11 +577,13 @@ private struct FooterChip: View {
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(isOn ? .blue : .white.opacity(0.70))
 
-                Text(title)
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.white.opacity(isOn ? 0.92 : 0.68))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.88)
+                if !compact {
+                    Text(title)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.white.opacity(isOn ? 0.92 : 0.68))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.88)
+                }
             }
             .frame(width: width, height: 32)
             .background(isOn ? Color.white.opacity(0.15) : Color.white.opacity(0.07), in: Capsule())
@@ -512,10 +593,38 @@ private struct FooterChip: View {
             }
         }
         .buttonStyle(.plain)
+        .help(title)
     }
 }
 
 private struct InsertActionButton: View {
+    enum Mode {
+        case full
+        case short
+        case wide
+
+        var title: String {
+            switch self {
+            case .full, .wide:
+                return "Insert into Codex"
+            case .short:
+                return "Insert"
+            }
+        }
+
+        var width: CGFloat? {
+            switch self {
+            case .full:
+                return 136
+            case .short:
+                return 86
+            case .wide:
+                return nil
+            }
+        }
+    }
+
+    var mode: Mode
     var action: () -> Void
 
     var body: some View {
@@ -531,13 +640,14 @@ private struct InsertActionButton: View {
                             .strokeBorder(.white.opacity(0.14), lineWidth: 1)
                     }
 
-                Text("Insert into Codex")
+                Text(mode.title)
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.white.opacity(0.95))
                     .lineLimit(1)
                     .minimumScaleFactor(0.86)
             }
-            .frame(width: 136, height: 32)
+            .frame(width: mode.width, height: 32)
+            .frame(maxWidth: mode.width == nil ? .infinity : nil)
             .background {
                 Capsule()
                     .fill(.ultraThinMaterial)

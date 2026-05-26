@@ -4,6 +4,7 @@ import SwiftUI
 @MainActor
 final class NotesPanelController: NSObject, NSWindowDelegate {
     private static let defaultSize = NSSize(width: 470, height: 530)
+    private static let minimumSize = NSSize(width: 260, height: 360)
 
     private let model: NotesPanelModel
     private lazy var panel: NSPanel = makePanel()
@@ -65,7 +66,7 @@ final class NotesPanelController: NSObject, NSWindowDelegate {
         panel.backgroundColor = .clear
         panel.isOpaque = false
         panel.hasShadow = true
-        panel.minSize = Self.defaultSize
+        panel.minSize = Self.minimumSize
         panel.collectionBehavior = [.fullScreenAuxiliary]
         panel.contentView = NSHostingView(rootView: NotesPanelView(model: model))
         panel.delegate = self
@@ -85,7 +86,7 @@ final class NotesPanelController: NSObject, NSWindowDelegate {
     }
 
     private func isUsableSavedFrame(_ frame: NSRect) -> Bool {
-        guard frame.width >= Self.defaultSize.width, frame.height >= Self.defaultSize.height else {
+        guard frame.width >= Self.minimumSize.width, frame.height >= Self.minimumSize.height else {
             return false
         }
 
