@@ -156,7 +156,7 @@ struct PanelSettingsView: View {
 
     private var privacySection: some View {
         SettingsCard(systemImage: "lock", title: "Privacy", detail: "Local only", detailColor: .blue) {
-            Text("Notes stay in Application Support. They are not sent to Codex until you press Send to AI.")
+            Text("Notes stay in Application Support. They are not sent to Codex until you press Insert into Codex.")
                 .font(.caption)
                 .foregroundStyle(.white.opacity(0.58))
                 .fixedSize(horizontal: false, vertical: true)

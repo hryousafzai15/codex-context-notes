@@ -4,7 +4,7 @@ Codex Context Notes is a lightweight native macOS companion for keeping private
 notes, todos, and follow-ups attached to the Codex chat or project you are
 working in.
 
-Notes stay local until you explicitly choose **Send to AI**. The app is designed
+Notes stay local until you explicitly choose **Insert into Codex**. The app is designed
 for people who want a memory layer beside Codex without automatically adding
 private thoughts to every prompt.
 
@@ -58,7 +58,7 @@ swift test
 3. Press the configured shortcut. The default is `Control` + `Option` + `N`.
 4. Add a note, todo, or follow-up.
 5. Select the exact items you want to include.
-6. Press **Send to AI** and review the handoff.
+6. Press **Insert into Codex** to place the selected note, todos, and follow-ups into the Codex composer.
 
 The app does not send anything automatically. It prepares text and inserts it
 into the Codex composer only when you ask it to.

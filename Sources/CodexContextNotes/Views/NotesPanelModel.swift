@@ -46,14 +46,6 @@ final class NotesPanelModel: ObservableObject {
             !note.reminders.isEmpty
     }
 
-    var selectedOpenTodoCount: Int {
-        note.todos.filter { !$0.isDone && selectedTodoIDs.contains($0.id) }.count
-    }
-
-    var selectedReminderCount: Int {
-        note.reminders.filter { selectedReminderIDs.contains($0.id) }.count
-    }
-
     func load(context: CodexContext) {
         note = repository.note(for: context)
         selectedTodoIDs = Set(note.todos.filter { !$0.isDone }.map(\.id))
@@ -157,7 +149,7 @@ final class NotesPanelModel: ObservableObject {
 
         switch promptSender.insertIntoCodex(prompt) {
         case .pasteRequested:
-            statusText = "Sent to Codex composer. Review before sending."
+            statusText = "Inserted into the Codex composer."
         case .copiedNeedsAccessibility:
             statusText = "Copied. Enable Accessibility permission to auto-paste."
             promptSender.requestAccessibilityPermission()
