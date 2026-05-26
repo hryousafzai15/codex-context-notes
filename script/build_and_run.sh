@@ -18,11 +18,8 @@ INFO_PLIST="$APP_CONTENTS/Info.plist"
 VERSION_FILE="$ROOT_DIR/VERSION"
 
 cd "$ROOT_DIR"
-pkill -x "Noto" >/dev/null 2>&1 || true
-pkill -x "$APP_NAME" >/dev/null 2>&1 || true
-pkill -x "$PRODUCT_NAME" >/dev/null 2>&1 || true
-pkill -f "/Noto.app/Contents/MacOS/Noto" >/dev/null 2>&1 || true
-pkill -f "/CodexContextNotes.app/Contents/MacOS/CodexContextNotes" >/dev/null 2>&1 || true
+pkill -f "$APP_BINARY" >/dev/null 2>&1 || true
+pkill -f "$DIST_DIR/CodexContextNotes.app/Contents/MacOS/CodexContextNotes" >/dev/null 2>&1 || true
 pkill -f "$ROOT_DIR/.*/$APP_NAME.app/Contents/MacOS/$APP_NAME" >/dev/null 2>&1 || true
 pkill -f "$ROOT_DIR/.build/.*/$PRODUCT_NAME" >/dev/null 2>&1 || true
 

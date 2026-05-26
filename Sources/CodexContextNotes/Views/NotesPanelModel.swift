@@ -62,7 +62,6 @@ final class NotesPanelModel: ObservableObject {
 
     func showSettings() {
         isShowingSettings = true
-        isLoadingContext = false
     }
 
     func hideSettings() {

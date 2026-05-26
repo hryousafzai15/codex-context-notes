@@ -84,7 +84,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func showSettingsFromMenu() {
+        panelController?.beginContextRefresh()
         panelController?.showSettings()
+        refreshDetectedContext()
     }
 
     private func handleShortcutPressed() {
@@ -140,18 +142,55 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private nonisolated static func detectContext(detector: CodexContextDetector) async -> CodexContext {
-        await withTaskGroup(of: CodexContext.self) { group in
-            group.addTask {
-                detector.detect()
-            }
-            group.addTask {
-                try? await Task.sleep(nanoseconds: 2_500_000_000)
-                return CodexContextDetector.fastFallbackContext()
+        await withCheckedContinuation { continuation in
+            let race = ContextDetectionRace(continuation: continuation)
+
+            Task.detached {
+                let context = detector.detect()
+                race.complete(with: context)
             }
 
-            let context = await group.next() ?? .fallback()
-            group.cancelAll()
-            return context
+            Task.detached {
+                do {
+                    try await Task.sleep(nanoseconds: 2_500_000_000)
+                } catch {
+                    return
+                }
+
+                guard !race.isCompleted else {
+                    return
+                }
+
+                race.complete(with: detector.fastFallbackContext())
+            }
         }
+    }
+}
+
+private final class ContextDetectionRace: @unchecked Sendable {
+    private let lock = NSLock()
+    private var completed = false
+    private let continuation: CheckedContinuation<CodexContext, Never>
+
+    init(continuation: CheckedContinuation<CodexContext, Never>) {
+        self.continuation = continuation
+    }
+
+    var isCompleted: Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        return completed
+    }
+
+    func complete(with context: CodexContext) {
+        lock.lock()
+        guard !completed else {
+            lock.unlock()
+            return
+        }
+        completed = true
+        lock.unlock()
+
+        continuation.resume(returning: context)
     }
 }

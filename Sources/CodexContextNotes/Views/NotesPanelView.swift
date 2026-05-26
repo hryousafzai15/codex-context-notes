@@ -575,9 +575,18 @@ private struct FooterChip: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 5) {
-                Image(systemName: isOn ? "checkmark.circle.fill" : systemImage)
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(isOn ? .blue : .white.opacity(0.70))
+                ZStack(alignment: .bottomTrailing) {
+                    Image(systemName: systemImage)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(isOn ? .blue : .white.opacity(0.70))
+
+                    if isOn && compact {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 8, weight: .bold))
+                            .foregroundStyle(.blue, .white)
+                            .offset(x: 5, y: 5)
+                    }
+                }
 
                 if !compact {
                     Text(title)
@@ -596,6 +605,8 @@ private struct FooterChip: View {
         }
         .buttonStyle(.plain)
         .help(title)
+        .accessibilityLabel(Text(title))
+        .accessibilityValue(Text(isOn ? "Included" : "Excluded"))
     }
 }
 
