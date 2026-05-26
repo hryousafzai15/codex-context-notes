@@ -4,7 +4,6 @@ import Foundation
 
 struct CodexActiveWindowHints: Equatable {
     var chatTitle: String
-    var projectName: String?
 }
 
 final class CodexAccessibilityContextReader {
@@ -35,9 +34,22 @@ final class CodexAccessibilityContextReader {
             return nil
         }
 
-        let projectName = projectName(containing: chatTitle, in: window)
-        AppLogger.write("accessibility context active chat \(chatTitle) project \(projectName ?? "unknown")")
-        return CodexActiveWindowHints(chatTitle: chatTitle, projectName: projectName)
+        AppLogger.write("accessibility context active chat \(chatTitle)")
+        return CodexActiveWindowHints(chatTitle: chatTitle)
+    }
+
+    func projectName(containing chatTitle: String, for pid: pid_t) -> String? {
+        guard AXIsProcessTrusted() else {
+            return nil
+        }
+
+        let appElement = AXUIElementCreateApplication(pid)
+        AXUIElementSetMessagingTimeout(appElement, messagingTimeout)
+        guard let window = focusedWindow(in: appElement) else {
+            return nil
+        }
+        AXUIElementSetMessagingTimeout(window, messagingTimeout)
+        return projectName(containing: chatTitle, in: window)
     }
 
     func requestAccessibilityPermission() {

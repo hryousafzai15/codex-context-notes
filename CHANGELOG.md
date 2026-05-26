@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented here.
 
+## 0.4.3 - 2026-05-26
+
+- Removed artificial startup waits from panel launch paths.
+- Reduced active Codex chat detection work when a matching Codex session is already available.
+
 ## 0.4.2 - 2026-05-26
 
 - Moved Settings into the notes panel so it opens with the same glass design instead of a separate pop-up.
