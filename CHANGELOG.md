@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here.
 
+## 0.4.1 - 2026-05-26
+
+- Changed the configured global shortcut to toggle the notes panel open and closed.
+
 ## 0.4.0 - 2026-05-26
 
 - Added configurable global shortcut recording in Settings.

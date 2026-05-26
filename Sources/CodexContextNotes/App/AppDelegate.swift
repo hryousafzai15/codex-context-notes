@@ -112,6 +112,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func openPanelFromShortcut() {
+        if panelController?.isVisible == true {
+            contextRefreshTask?.cancel()
+            panelController?.close()
+            return
+        }
+
         panelController?.beginContextRefresh()
         panelController?.present()
         refreshDetectedContext()
