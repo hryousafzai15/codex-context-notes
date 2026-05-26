@@ -1,0 +1,35 @@
+name: Bug report
+description: Report a reproducible problem
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: List the exact steps.
+      placeholder: |
+        1. Open...
+        2. Press...
+        3. See...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      placeholder: "0.3.0"
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: macOS version, Codex version, and whether Accessibility permission is enabled.
+    validations:
+      required: true

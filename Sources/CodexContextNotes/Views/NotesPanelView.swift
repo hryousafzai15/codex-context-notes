@@ -1,0 +1,724 @@
+import SwiftUI
+
+struct NotesPanelView: View {
+    @ObservedObject var model: NotesPanelModel
+    @State private var activeSection: PanelSection = .none
+    @State private var showingReview = false
+
+    var body: some View {
+        ZStack {
+            if showingReview {
+                reviewScreen
+            } else {
+                commandPalette
+            }
+        }
+        .frame(width: 390, height: 530)
+        .background(GlassPanelBackground())
+        .foregroundStyle(.white)
+        .tint(.blue)
+        .onChange(of: model.note.body) { _, _ in
+            model.save()
+        }
+    }
+
+    private var commandPalette: some View {
+        VStack(spacing: 0) {
+            header
+
+            ScrollView {
+                VStack(spacing: 10) {
+                    if activeSection == .none && !model.hasExistingContent {
+                        emptyStartRow
+                    } else if activeSection == .note {
+                        expandedNote
+                    } else {
+                        collapsedRow(
+                            section: .note,
+                            systemImage: "lock",
+                            title: "Private note",
+                            detail: noteDetail
+                        )
+                    }
+
+                    if activeSection == .todos {
+                        expandedTodos
+                    } else {
+                        collapsedRow(
+                            section: .todos,
+                            systemImage: "list.bullet",
+                            title: "Todos",
+                            count: model.openTodoCount
+                        )
+                    }
+
+                    if activeSection == .followUps {
+                        expandedFollowUps
+                    } else {
+                        collapsedRow(
+                            section: .followUps,
+                            systemImage: "calendar",
+                            title: "Follow-ups",
+                            count: model.note.reminders.count
+                        )
+                    }
+                }
+                .padding(.horizontal, 14)
+                .padding(.top, 6)
+                .padding(.bottom, 14)
+            }
+            .scrollIndicators(.hidden)
+
+            footer
+        }
+    }
+
+    private var header: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .top, spacing: 10) {
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "sparkle")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(.white.opacity(0.72))
+
+                        Text("Auto-detected from \(model.note.context.sourceAppName)")
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(.white.opacity(0.56))
+                            .lineLimit(1)
+                    }
+
+                    Text(model.note.context.displayTitle)
+                        .font(.system(size: 23, weight: .semibold))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.68)
+
+                    Text(model.note.context.displaySubtitle)
+                        .font(.caption)
+                        .foregroundStyle(.white.opacity(0.58))
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                }
+
+                Spacer(minLength: 8)
+
+                VStack(alignment: .trailing, spacing: 12) {
+                    Text("⌃⌥N")
+                        .font(.caption2.monospaced().weight(.semibold))
+                        .foregroundStyle(.white.opacity(0.58))
+
+                    Image(systemName: "arrow.up.left.and.arrow.down.right")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.white.opacity(0.46))
+                }
+                .padding(.top, 26)
+            }
+        }
+        .padding(.horizontal, 18)
+        .padding(.top, 36)
+        .padding(.bottom, 10)
+    }
+
+    private var emptyStartRow: some View {
+        Button {
+            activeSection = .note
+        } label: {
+            HStack(alignment: .top, spacing: 10) {
+                Image(systemName: "checkmark.square")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.58))
+                    .frame(width: 18, height: 18)
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("No notes for this context yet.")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.white.opacity(0.72))
+
+                    Text("Start with a note, todo, or follow-up.")
+                        .font(.caption)
+                        .foregroundStyle(.white.opacity(0.46))
+                }
+
+                Spacer()
+            }
+            .padding(14)
+            .paletteSurface(cornerRadius: 12)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var expandedNote: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            sectionHeader(
+                systemImage: "lock",
+                title: "Private note",
+                detail: "\(model.note.body.count) / 5000",
+                section: .note,
+                isExpanded: true
+            )
+
+            ZStack(alignment: .topLeading) {
+                TextEditor(text: $model.note.body)
+                    .font(.system(size: 13))
+                    .foregroundStyle(.white)
+                    .scrollContentBackground(.hidden)
+                    .padding(10)
+                    .frame(height: 116)
+                    .background {
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .fill(Color.black.opacity(0.20))
+                    }
+
+                if model.note.body.isEmpty {
+                    Text("Write the private context you want attached to this Codex context.\nIt is not shared until you insert it.")
+                        .font(.caption)
+                        .lineSpacing(3)
+                        .foregroundStyle(.white.opacity(0.38))
+                        .padding(17)
+                        .allowsHitTesting(false)
+                }
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .strokeBorder(.blue.opacity(0.80), lineWidth: 1.2)
+            }
+        }
+        .padding(12)
+        .paletteSurface(cornerRadius: 12)
+    }
+
+    private var expandedTodos: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            sectionHeader(
+                systemImage: "list.bullet",
+                title: "Todos",
+                detail: nil,
+                count: model.openTodoCount,
+                section: .todos,
+                isExpanded: true
+            )
+
+            HStack(spacing: 0) {
+                TextField("Add a todo", text: $model.newTodoText)
+                    .textFieldStyle(.plain)
+                    .font(.caption)
+                    .foregroundStyle(.white)
+                    .onSubmit { model.addTodo() }
+                    .padding(.horizontal, 10)
+                    .frame(height: 38)
+
+                Button {
+                    model.addTodo()
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.system(size: 15, weight: .bold))
+                        .frame(width: 38, height: 38)
+                }
+                .buttonStyle(.plain)
+                .background(Color.white.opacity(0.10), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .help("Add todo")
+            }
+            .background(Color.black.opacity(0.15), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 9, style: .continuous)
+                    .strokeBorder(.white.opacity(0.10), lineWidth: 1)
+            }
+
+            VStack(spacing: 6) {
+                ForEach(model.note.todos) { todo in
+                    TodoRow(
+                        todo: todo,
+                        isSelectedForHandoff: model.selectedTodoIDs.contains(todo.id)
+                    ) {
+                        model.toggleTodo(todo)
+                    } onToggleSelected: {
+                        model.toggleTodoSelection(todo)
+                    } onDelete: {
+                        model.deleteTodo(todo)
+                    }
+                }
+
+                if model.note.todos.isEmpty {
+                    EmptyRow(systemImage: "circle", text: "No todos yet.")
+                }
+            }
+        }
+        .padding(12)
+        .paletteSurface(cornerRadius: 12)
+    }
+
+    private var expandedFollowUps: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            sectionHeader(
+                systemImage: "calendar",
+                title: "Follow-ups",
+                detail: nil,
+                count: model.note.reminders.count,
+                section: .followUps,
+                isExpanded: true
+            )
+
+            HStack(spacing: 6) {
+                TextField("Add a follow-up", text: $model.newReminderText)
+                    .textFieldStyle(.plain)
+                    .font(.caption)
+                    .foregroundStyle(.white)
+                    .onSubmit { model.addReminder() }
+                    .padding(.horizontal, 10)
+                    .frame(height: 38)
+
+                TextField("When", text: $model.newReminderDueText)
+                    .textFieldStyle(.plain)
+                    .font(.caption)
+                    .foregroundStyle(.white)
+                    .onSubmit { model.addReminder() }
+                    .padding(.horizontal, 8)
+                    .frame(width: 74, height: 38)
+
+                Button {
+                    model.addReminder()
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.system(size: 15, weight: .bold))
+                        .frame(width: 38, height: 38)
+                }
+                .buttonStyle(.plain)
+                .background(Color.white.opacity(0.10), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .help("Add follow-up")
+            }
+            .background(Color.black.opacity(0.15), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 9, style: .continuous)
+                    .strokeBorder(.white.opacity(0.10), lineWidth: 1)
+            }
+
+            VStack(spacing: 6) {
+                ForEach(model.note.reminders) { reminder in
+                    FollowUpRow(
+                        reminder: reminder,
+                        isSelectedForHandoff: model.selectedReminderIDs.contains(reminder.id)
+                    ) {
+                        model.toggleReminderSelection(reminder)
+                    } onDelete: {
+                        model.deleteReminder(reminder)
+                    }
+                }
+
+                if model.note.reminders.isEmpty {
+                    EmptyRow(systemImage: "circle", text: "No follow-ups yet.")
+                }
+            }
+        }
+        .padding(12)
+        .paletteSurface(cornerRadius: 12)
+    }
+
+    private func collapsedRow(
+        section: PanelSection,
+        systemImage: String,
+        title: String,
+        detail: String? = nil,
+        count: Int? = nil
+    ) -> some View {
+        Button {
+            activeSection = section
+        } label: {
+            HStack(spacing: 10) {
+                Image(systemName: systemImage)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.78))
+                    .frame(width: 16)
+
+                Text(title)
+                    .font(.callout.weight(.semibold))
+                    .foregroundStyle(.white.opacity(0.90))
+
+                Spacer()
+
+                if let detail {
+                    Text(detail)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.white.opacity(0.44))
+                        .lineLimit(1)
+                }
+
+                if let count {
+                    Text("\(count)")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(.white.opacity(0.75))
+                        .frame(minWidth: 20, minHeight: 20)
+                        .background(Color.white.opacity(0.10), in: Capsule())
+                }
+
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(.white.opacity(0.42))
+            }
+            .padding(.horizontal, 12)
+            .frame(height: 42)
+            .paletteSurface(cornerRadius: 11)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func sectionHeader(
+        systemImage: String,
+        title: String,
+        detail: String?,
+        count: Int? = nil,
+        section: PanelSection,
+        isExpanded: Bool
+    ) -> some View {
+        Button {
+            activeSection = isExpanded ? .none : section
+        } label: {
+            HStack(spacing: 9) {
+                Image(systemName: systemImage)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.82))
+                    .frame(width: 15)
+
+                Text(title)
+                    .font(.callout.weight(.semibold))
+                    .foregroundStyle(.white.opacity(0.92))
+
+                Spacer()
+
+                if let detail {
+                    Text(detail)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.white.opacity(0.48))
+                }
+
+                if let count {
+                    Text("\(count)")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(.white.opacity(0.76))
+                        .frame(minWidth: 20, minHeight: 20)
+                        .background(Color.white.opacity(0.12), in: Capsule())
+                }
+
+                Image(systemName: isExpanded ? "chevron.up" : "chevron.right")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(.white.opacity(0.44))
+            }
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var footer: some View {
+        HStack(spacing: 8) {
+            FooterChip(title: "Note", systemImage: "note.text", isOn: model.includeNote) {
+                model.includeNote.toggle()
+                activeSection = .note
+            }
+
+            FooterChip(title: "Todos", systemImage: "list.bullet", isOn: model.includeTodos) {
+                model.includeTodos.toggle()
+                activeSection = .todos
+            }
+
+            FooterChip(title: "Follow-ups", systemImage: "calendar", isOn: model.includeReminders) {
+                model.includeReminders.toggle()
+                activeSection = .followUps
+            }
+
+            Spacer(minLength: 8)
+
+            Button {
+                if model.promptPreview.isEmpty {
+                    model.insertIntoCodex()
+                } else {
+                    showingReview = true
+                }
+            } label: {
+                Label("Send to AI", systemImage: "sparkle")
+                    .font(.caption.weight(.semibold))
+                    .frame(width: 94, height: 32)
+            }
+            .buttonStyle(.borderedProminent)
+            .buttonBorderShape(.roundedRectangle(radius: 11))
+        }
+        .padding(.horizontal, 14)
+        .padding(.top, 10)
+        .padding(.bottom, 12)
+    }
+
+    private var reviewScreen: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 5) {
+                    Text("Review before sending")
+                        .font(.headline.weight(.semibold))
+
+                    Text("This is what will be sent to Codex.")
+                        .font(.caption)
+                        .foregroundStyle(.white.opacity(0.58))
+                }
+
+                Spacer()
+
+                Button {
+                    showingReview = false
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.caption.weight(.bold))
+                        .frame(width: 24, height: 24)
+                        .background(Color.white.opacity(0.08), in: Circle())
+                }
+                .buttonStyle(.plain)
+                .help("Close")
+            }
+
+            reviewBlock(
+                systemImage: "lock",
+                title: "Private note",
+                detail: "\(model.note.body.split(separator: "\n").count) paragraphs · \(model.note.body.count) chars",
+                content: model.note.body.isEmpty ? "No private note selected." : model.note.body
+            )
+
+            reviewRow(systemImage: "list.bullet", title: "Todos", detail: "\(model.selectedOpenTodoCount) selected")
+            reviewRow(systemImage: "calendar", title: "Follow-ups", detail: "\(model.selectedReminderCount) selected")
+            reviewRow(systemImage: "folder", title: "Include context", detail: model.note.context.noteKindLabel)
+
+            Spacer()
+
+            HStack(spacing: 10) {
+                Button("Cancel") {
+                    showingReview = false
+                }
+                .buttonStyle(.bordered)
+                .buttonBorderShape(.roundedRectangle(radius: 10))
+
+                Button {
+                    showingReview = false
+                    model.insertIntoCodex()
+                } label: {
+                    Label("Insert into Codex", systemImage: "sparkle")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .buttonBorderShape(.roundedRectangle(radius: 10))
+            }
+        }
+        .padding(18)
+    }
+
+    private func reviewBlock(systemImage: String, title: String, detail: String, content: String) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Label(title, systemImage: systemImage)
+                    .font(.caption.weight(.semibold))
+                Spacer()
+                Text(detail)
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(.white.opacity(0.46))
+                Image(systemName: "chevron.down")
+                    .font(.caption2.weight(.bold))
+                    .foregroundStyle(.white.opacity(0.40))
+            }
+
+            Text(content)
+                .font(.caption)
+                .foregroundStyle(.white.opacity(0.76))
+                .lineLimit(5)
+                .lineSpacing(3)
+        }
+        .padding(12)
+        .paletteSurface(cornerRadius: 10)
+    }
+
+    private func reviewRow(systemImage: String, title: String, detail: String) -> some View {
+        HStack(spacing: 9) {
+            Label(title, systemImage: systemImage)
+                .font(.caption.weight(.semibold))
+
+            Spacer()
+
+            Text(detail)
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(.white.opacity(0.48))
+
+            Image(systemName: "chevron.right")
+                .font(.caption2.weight(.bold))
+                .foregroundStyle(.white.opacity(0.42))
+        }
+        .padding(.horizontal, 12)
+        .frame(height: 42)
+        .paletteSurface(cornerRadius: 10)
+    }
+
+    private var noteDetail: String {
+        model.note.body.isEmpty ? "0 / 5000" : "\(model.note.body.count) / 5000"
+    }
+}
+
+private enum PanelSection {
+    case none
+    case note
+    case todos
+    case followUps
+}
+
+private struct FooterChip: View {
+    var title: String
+    var systemImage: String
+    var isOn: Bool
+    var action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 5) {
+                Image(systemName: isOn ? "checkmark.circle.fill" : systemImage)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(isOn ? .blue : .white.opacity(0.70))
+
+                Text(title)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.white.opacity(isOn ? 0.92 : 0.68))
+                    .lineLimit(1)
+            }
+            .padding(.horizontal, 9)
+            .frame(height: 30)
+            .background(isOn ? Color.white.opacity(0.15) : Color.white.opacity(0.07), in: Capsule())
+            .overlay {
+                Capsule()
+                    .strokeBorder(.white.opacity(isOn ? 0.17 : 0.09), lineWidth: 1)
+            }
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+private struct TodoRow: View {
+    var todo: NoteTodo
+    var isSelectedForHandoff: Bool
+    var onToggle: () -> Void
+    var onToggleSelected: () -> Void
+    var onDelete: () -> Void
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 9) {
+            Button(action: onToggleSelected) {
+                Image(systemName: isSelectedForHandoff ? "checkmark.square.fill" : "square")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(isSelectedForHandoff ? .blue : .white.opacity(0.48))
+                    .frame(width: 28, height: 28)
+            }
+            .buttonStyle(.plain)
+            .help(isSelectedForHandoff ? "Included in Send to AI" : "Include in Send to AI")
+
+            Button(action: onToggle) {
+                Image(systemName: todo.isDone ? "checkmark.circle.fill" : "circle")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(todo.isDone ? .green : .white.opacity(0.56))
+                    .frame(width: 28, height: 28)
+            }
+            .buttonStyle(.plain)
+            .help(todo.isDone ? "Mark open" : "Mark done")
+
+            Text(todo.text)
+                .font(.caption)
+                .lineSpacing(2)
+                .foregroundStyle(todo.isDone ? .white.opacity(0.42) : .white.opacity(0.84))
+                .strikethrough(todo.isDone)
+                .lineLimit(2)
+
+            Spacer()
+
+            Button(action: onDelete) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(.white.opacity(0.42))
+                    .frame(width: 30, height: 30)
+                    .background(Color.white.opacity(0.06), in: Circle())
+            }
+            .buttonStyle(.plain)
+            .help("Delete todo")
+        }
+        .padding(.horizontal, 3)
+        .padding(.vertical, 3)
+    }
+}
+
+private struct FollowUpRow: View {
+    var reminder: NoteReminder
+    var isSelectedForHandoff: Bool
+    var onToggleSelected: () -> Void
+    var onDelete: () -> Void
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 9) {
+            Button(action: onToggleSelected) {
+                Image(systemName: isSelectedForHandoff ? "checkmark.square.fill" : "square")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(isSelectedForHandoff ? .blue : .white.opacity(0.48))
+                    .frame(width: 28, height: 28)
+            }
+            .buttonStyle(.plain)
+            .help(isSelectedForHandoff ? "Included in Send to AI" : "Include in Send to AI")
+
+            Text(reminder.text)
+                .font(.caption)
+                .lineSpacing(2)
+                .foregroundStyle(.white.opacity(0.84))
+                .lineLimit(2)
+
+            Spacer()
+
+            Text(reminder.dueText)
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(.blue)
+                .lineLimit(1)
+                .padding(.horizontal, 7)
+                .frame(height: 24)
+                .background(Color.blue.opacity(0.14), in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+
+            Button(action: onDelete) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(.white.opacity(0.42))
+                    .frame(width: 30, height: 30)
+                    .background(Color.white.opacity(0.06), in: Circle())
+            }
+            .buttonStyle(.plain)
+            .help("Delete follow-up")
+        }
+        .padding(.horizontal, 3)
+        .padding(.vertical, 3)
+    }
+}
+
+private struct EmptyRow: View {
+    var systemImage: String
+    var text: String
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: systemImage)
+            Text(text)
+            Spacer()
+        }
+        .font(.caption)
+        .foregroundStyle(.white.opacity(0.36))
+        .padding(.horizontal, 10)
+        .frame(height: 34)
+        .background(Color.white.opacity(0.035), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+    }
+}
+
+private extension View {
+    func paletteSurface(cornerRadius: CGFloat) -> some View {
+        self
+            .background {
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .fill(.ultraThinMaterial)
+                    .overlay(Color.white.opacity(0.035))
+                    .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .strokeBorder(.white.opacity(0.13), lineWidth: 1)
+            }
+    }
+}
